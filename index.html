@@ -324,12 +324,6 @@
     <!-- Image Stream -->
     <div class="image-stream" id="imageStream"></div>
 
-    <!-- Sticky Contact Bar -->
-    <div class="sticky-contact" id="stickyContact">
-        <a href="tel:3102951136">310-295-1136</a>
-        <a href="mailto:josh@jwgre.com" class="cta">GET IN TOUCH</a>
-    </div>
-
     <!-- Contact Popup -->
     <div class="popup-overlay" id="popup">
         <div class="popup-content">
@@ -379,8 +373,6 @@
         // Show popup after 20 seconds OR 50% scroll
         let popupShown = false;
         const popup = document.getElementById('popup');
-        const stickyContact = document.getElementById('stickyContact');
-
         function showPopup() {
             if (!popupShown) {
                 popup.classList.add('active');
@@ -395,19 +387,10 @@
         // Show popup after 20 seconds
         setTimeout(showPopup, 20000);
 
-        // Show sticky bar after scrolling past hero
+        // Show popup at 40% scroll
         window.addEventListener('scroll', () => {
             const scrolled = window.scrollY;
             const viewportHeight = window.innerHeight;
-            
-            // Show sticky bar after scrolling past video
-            if (scrolled > viewportHeight) {
-                stickyContact.classList.add('visible');
-            } else {
-                stickyContact.classList.remove('visible');
-            }
-
-            // Show popup at 40% scroll
             const docHeight = document.body.scrollHeight - viewportHeight;
             if (scrolled / docHeight > 0.4) {
                 showPopup();
