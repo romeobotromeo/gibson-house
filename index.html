@@ -345,29 +345,31 @@
     </footer>
 
     <script>
-        // Force lock scroll for 3 seconds - no escape
-        function preventScroll(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }
+        // Force lock scroll for 3 seconds - ABSOLUTE lock
+        let isLocked = true;
         
-        // Block ALL scroll attempts
-        document.addEventListener('wheel', preventScroll, { passive: false });
-        document.addEventListener('touchmove', preventScroll, { passive: false });
-        document.addEventListener('keydown', function(e) {
-            if ([32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
-                e.preventDefault();
-            }
-        });
+        // Force scroll to top immediately
+        window.scrollTo(0, 0);
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = '0';
+        
+        // Backup: keep forcing to top
+        const lockInterval = setInterval(() => {
+            if (isLocked) window.scrollTo(0, 0);
+        }, 10);
 
         // Unlock after 3 seconds
         setTimeout(() => {
+            isLocked = false;
+            clearInterval(lockInterval);
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.top = '';
             document.body.classList.remove('locked');
             document.getElementById('scrollPrompt').classList.add('visible');
-            // Remove scroll blockers
-            document.removeEventListener('wheel', preventScroll);
-            document.removeEventListener('touchmove', preventScroll);
         }, 3000);
 
         // Show popup after 20 seconds OR 50% scroll
