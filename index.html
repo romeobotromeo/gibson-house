@@ -351,10 +351,29 @@
     </footer>
 
     <script>
-        // Unlock scroll after 3 seconds
+        // Force lock scroll for 3 seconds - no escape
+        function preventScroll(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        
+        // Block ALL scroll attempts
+        document.addEventListener('wheel', preventScroll, { passive: false });
+        document.addEventListener('touchmove', preventScroll, { passive: false });
+        document.addEventListener('keydown', function(e) {
+            if ([32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
+                e.preventDefault();
+            }
+        });
+
+        // Unlock after 3 seconds
         setTimeout(() => {
             document.body.classList.remove('locked');
             document.getElementById('scrollPrompt').classList.add('visible');
+            // Remove scroll blockers
+            document.removeEventListener('wheel', preventScroll);
+            document.removeEventListener('touchmove', preventScroll);
         }, 3000);
 
         // Show popup after 20 seconds OR 50% scroll
