@@ -314,7 +314,7 @@
 
     <!-- Hero Video -->
     <section class="hero-video">
-        <video autoplay muted loop playsinline webkit-playsinline preload="auto">
+        <video autoplay muted loop playsinline webkit-playsinline preload="auto" poster="videos/poster.jpg">
             <source src="videos/hero.mp4" type="video/mp4">
             <source src="videos/hero.MOV" type="video/quicktime">
         </video>
@@ -323,6 +323,12 @@
 
     <!-- Image Stream -->
     <div class="image-stream" id="imageStream"></div>
+
+    <!-- Sticky Contact Bar -->
+    <div class="sticky-contact" id="stickyContact">
+        <a href="tel:3102951136">310-295-1136</a>
+        <a href="mailto:josh@jwgre.com" class="cta">GET IN TOUCH</a>
+    </div>
 
     <!-- Contact Popup -->
     <div class="popup-overlay" id="popup">
@@ -389,11 +395,21 @@
         // Show popup after 20 seconds
         setTimeout(showPopup, 20000);
 
-        // Show popup at 40% scroll
+        // Show sticky bar and popup on scroll
+        const stickyContact = document.getElementById('stickyContact');
         window.addEventListener('scroll', () => {
             const scrolled = window.scrollY;
             const viewportHeight = window.innerHeight;
             const docHeight = document.body.scrollHeight - viewportHeight;
+            
+            // Show sticky bar after scrolling past video
+            if (scrolled > viewportHeight) {
+                stickyContact.classList.add('visible');
+            } else {
+                stickyContact.classList.remove('visible');
+            }
+            
+            // Show popup at 40% scroll
             if (scrolled / docHeight > 0.4) {
                 showPopup();
             }
