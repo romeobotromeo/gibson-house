@@ -448,16 +448,41 @@
             "23.jpg", "24.jpg", "25.jpg", "26.jpg", "27.jpg", "28.jpg", "29.jpg", "30.jpg"
         ];
 
-        // Shuffle array randomly
+        // Aggressive shuffle - run multiple times to really mix it up
         function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+            for (let k = 0; k < 5; k++) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
             }
             return array;
         }
 
-        const shuffledImages = shuffle([...allImages]);
+        // Group by project prefix, then interleave
+        const projectGroups = {};
+        allImages.forEach(img => {
+            const prefix = img.substring(0, 8);
+            if (!projectGroups[prefix]) projectGroups[prefix] = [];
+            projectGroups[prefix].push(img);
+        });
+        
+        // Shuffle within each group
+        Object.keys(projectGroups).forEach(key => {
+            projectGroups[key] = shuffle(projectGroups[key]);
+        });
+        
+        // Interleave from all groups
+        const shuffledImages = [];
+        const groups = Object.values(projectGroups);
+        let maxLen = Math.max(...groups.map(g => g.length));
+        for (let i = 0; i < maxLen; i++) {
+            groups.forEach(group => {
+                if (group[i]) shuffledImages.push(group[i]);
+            });
+        }
+        // Final shuffle for extra randomness
+        shuffle(shuffledImages);
 
         // Stats to overlay on certain positions
         const statPositions = {
