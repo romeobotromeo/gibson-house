@@ -463,6 +463,12 @@
             box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
         }
 
+        .consultation-option.urgent .option-duration,
+        .consultation-option.urgent .option-subtitle,
+        .consultation-option.urgent .option-price {
+            color: #00ff41;
+        }
+
         .option-duration {
             font-family: Impact, 'Arial Black', sans-serif;
             font-size: 1.2rem;
@@ -769,25 +775,25 @@
         });
 
         async function createCheckoutSession(priceInCents, duration) {
-            // Direct Stripe Payment Links (no backend needed)
+            // Direct Stripe Payment Links (individual checkout for each service)
             let paymentUrl = '';
             
             switch(duration) {
                 case 'urgent':
-                    // URGENT NEED - Working payment link
+                    // URGENT NEED - $300 one-time
                     paymentUrl = 'https://buy.stripe.com/14A14m5LK4SAbMZf7HaAw01';
                     break;
                 case '60':
-                    // 60 Minute Consultation - Temporary redirect to urgent for testing
-                    paymentUrl = 'https://buy.stripe.com/14A14m5LK4SAbMZf7HaAw01';
+                    // 60 Minute Consultation - $185 
+                    paymentUrl = 'https://buy.stripe.com/eVqaEW7TSacUdV7bVvaAw02';
                     break;
                 case '30':
-                    // 30 Minute Consultation - Temporary redirect to urgent for testing  
-                    paymentUrl = 'https://buy.stripe.com/14A14m5LK4SAbMZf7HaAw01';
+                    // 30 Minute Consultation - Creating payment link next
+                    paymentUrl = 'https://buy.stripe.com/eVqaEW7TSacUdV7bVvaAw02';
                     break;
                 case '15':
-                    // 15 Minute Consultation - Temporary redirect to urgent for testing
-                    paymentUrl = 'https://buy.stripe.com/14A14m5LK4SAbMZf7HaAw01';
+                    // 15 Minute Consultation - Creating payment link next
+                    paymentUrl = 'https://buy.stripe.com/eVqaEW7TSacUdV7bVvaAw02';
                     break;
                 default:
                     alert('Invalid consultation option');
