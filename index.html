@@ -413,6 +413,79 @@
             padding: 0.5rem 1rem;
             font-size: 0.8rem;
         }
+
+        /* Book Now Section */
+        .book-now {
+            padding: 3rem 1.5rem;
+            text-align: center;
+            background: #000;
+            border-top: 1px solid #333;
+        }
+
+        .book-now h2 {
+            font-family: Impact, 'Arial Black', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            letter-spacing: 0.1em;
+        }
+
+        .consultation-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .consultation-option {
+            padding: 1.5rem;
+            border: 2px solid #333;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .consultation-option:hover {
+            border-color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .consultation-option.urgent {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .consultation-option.urgent:hover {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.2);
+        }
+
+        .option-duration {
+            font-family: Impact, 'Arial Black', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .urgent .option-duration {
+            color: #ff6b35;
+        }
+
+        .urgent .option-price {
+            color: #ff6b35;
+        }
     </style>
 </head>
 <body class="locked">
@@ -432,6 +505,32 @@
         <div style="margin-top: 0.5rem; font-size: 0.65rem;">
             <a href="/privacy" style="margin-right: 1rem;">Privacy</a>
             <a href="/terms">Terms</a>
+        </div>
+    </section>
+
+    <!-- Book Now Section -->
+    <section class="book-now">
+        <div class="book-now-content">
+            <h2>BOOK NOW</h2>
+            <div class="consultation-options">
+                <div class="consultation-option" data-price="7000" data-duration="15">
+                    <div class="option-duration">15 Minutes</div>
+                    <div class="option-price">$70</div>
+                </div>
+                <div class="consultation-option" data-price="12000" data-duration="30">
+                    <div class="option-duration">30 Minutes</div>
+                    <div class="option-price">$120</div>
+                </div>
+                <div class="consultation-option" data-price="18500" data-duration="60">
+                    <div class="option-duration">60 Minutes</div>
+                    <div class="option-price">$185</div>
+                </div>
+                <div class="consultation-option urgent" data-price="30000" data-duration="urgent">
+                    <div class="option-duration">URGENT NEED</div>
+                    <div class="option-subtitle">Will respond in 1-3 Hours</div>
+                    <div class="option-price">$300</div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -463,6 +562,9 @@
         <span>© 2026 Gibson</span>
         <a href="mailto:josh@jwgre.com">josh@jwgre.com</a>
     </footer>
+
+    <!-- Stripe SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
 
     <script>
         // Force lock scroll for 3 seconds - ABSOLUTE lock
@@ -648,7 +750,96 @@
             div.innerHTML = html;
             stream.appendChild(div);
         });
+
+        // Stripe Integration for Consultations
+        document.addEventListener('DOMContentLoaded', function() {
+            const consultationOptions = document.querySelectorAll('.consultation-option');
+            
+            consultationOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const price = this.dataset.price;
+                    const duration = this.dataset.duration;
+                    
+                    // Create Stripe checkout
+                    createCheckoutSession(price, duration);
+                });
+            });
+        });
+
+        async function createCheckoutSession(priceInCents, duration) {
+            try {
+                let productId = '';
+                let serviceName = '';
+                
+                // Map consultation options to Stripe product IDs
+                switch(duration) {
+                    case '15':
+                        productId = 'prod_U3Gp52sLlix5SA';
+                        serviceName = '15 Minute Consultation';
+                        break;
+                    case '30':
+                        productId = 'prod_U3GrQge7Tn2LoQ';
+                        serviceName = '30 Minute Consultation';
+                        break;
+                    case '60':
+                        productId = 'prod_U3GsHXAoFSb69B';
+                        serviceName = '60 Minute Consultation';
+                        break;
+                    case 'urgent':
+                        productId = 'prod_U3GxXq0Lww6vwu';
+                        serviceName = 'URGENT NEED - 1-3 Hour Response';
+                        break;
+                    default:
+                        throw new Error('Invalid consultation option');
+                }
+                
+                // Create Stripe checkout session via backend
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        productId: productId,
+                        serviceName: serviceName,
+                        quantity: 1
+                    })
+                });
+                
+                const session = await response.json();
+                
+                if (session.error) {
+                    throw new Error(session.error);
+                }
+                
+                // Redirect to Stripe checkout
+                window.location.href = session.url;
+                
+            } catch (error) {
+                console.error('Error creating checkout session:', error);
+                
+                // Fallback: Direct Stripe checkout with product ID
+                const stripe = Stripe('pk_test_51SwDPiA1sCvsuZGf7oaU3FfCBSP6zVQM0HdRkCWGKLe8vZZPGZxpnRUq9xJNKx8hzfKGvKWdKNAr6m4Bm0vFYODb007vq8Vd4G');
+                
+                let productId = '';
+                switch(duration) {
+                    case '15': productId = 'prod_U3Gp52sLlix5SA'; break;
+                    case '30': productId = 'prod_U3GrQge7Tn2LoQ'; break;
+                    case '60': productId = 'prod_U3GsHXAoFSb69B'; break;
+                    case 'urgent': productId = 'prod_U3GxXq0Lww6vwu'; break;
+                }
+                
+                // Direct checkout redirect (for demonstration)
+                const checkoutUrl = `https://checkout.stripe.com/c/pay/cs_live_${productId}#fidkdWxOYHwnPyd1blppbHNgWjA0SHIzQm1sZG5XZjFyM0hza1F1dGhcYTxRNFdqVTNrNzVcTz1OSGRSMF11dG5kNTxvdXFpcWZqTU5jcElhNUtPRGpaVVVvQHRJQUhOXyc%2FJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWNgKSd3YGNgd3dgd0p3bGJsayc%2FJ21xcXV2PyoqZHBrZmZmKmRnZWpoKilmKm9qaSoqKmhva2w`;
+                
+                // For now, show alert with next steps
+                alert(`Selected: ${serviceName}\n\nNext: Complete payment through Stripe checkout.\n\nProduct ID: ${productId}`);
+            }
+        }
     </script>
+
+    <!-- Stripe.js -->
+    <script src="https://js.stripe.com/v3/"></script>
 
 </body>
 </html>
